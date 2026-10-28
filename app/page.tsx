@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
+  Music,
   Link2, 
-  Copy, 
   Download, 
   ArrowRight, 
   Loader2, 
   Check, 
-  AlertCircle 
+  AlertCircle,
+  Sparkles
 } from "lucide-react";
 
 interface ConvertResponse {
@@ -18,60 +19,19 @@ interface ConvertResponse {
   download_url: string;
 }
 
-interface NetworkInfo {
-  lan_ip: string;
-  port: number;
-}
-
 export default function Home() {
   const [url, setUrl] = useState<string>("");
   const [bitrate, setBitrate] = useState<"192" | "320" | "128">("192");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ConvertResponse | null>(null);
-  const [lanIp, setLanIp] = useState<string>("");
   const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    // If running online on custom domain / production
-    if (typeof window !== "undefined") {
-      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-      if (!isLocal) {
-        setLanIp(`https://${window.location.host}`);
-        return;
-      }
-    }
-
-    // Fetch LAN IP info from Go Fiber backend for local WiFi testing
-    fetch("/api/network")
-      .then((res) => res.json())
-      .then((data: NetworkInfo) => {
-        if (data.lan_ip) {
-          setLanIp(`http://${data.lan_ip}:3000`);
-        }
-      })
-      .catch(() => {
-        if (typeof window !== "undefined") {
-          setLanIp(`http://${window.location.hostname}:3000`);
-        }
-      });
-  }, []);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => {
       setToast(null);
-    }, 2000);
-  };
-
-  const handleCopyIp = async () => {
-    if (!lanIp) return;
-    try {
-      await navigator.clipboard.writeText(lanIp);
-      showToast("Alamat URL disalin");
-    } catch {
-      showToast("Gagal menyalin");
-    }
+    }, 2500);
   };
 
   const handlePaste = async () => {
@@ -152,83 +112,70 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans selection:bg-zinc-800 selection:text-white bg-[#09090b] text-zinc-100">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 font-sans bg-[#050508] text-zinc-100 overflow-hidden selection:bg-white/20 selection:text-white">
       
-      {/* Top Header */}
-      <header className="border-b border-zinc-800/80 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-zinc-100 text-zinc-950 flex items-center justify-center font-mono font-bold text-xs tracking-tight shadow-sm">
-            MP3
-          </div>
-          <div>
-            <span className="text-sm font-semibold tracking-tight text-zinc-100">Audio Extractor</span>
-            <span className="text-xs text-zinc-500 font-mono ml-2 hidden sm:inline">Next.js 14</span>
-          </div>
+      {/* iOS Ambient Glass Lighting Orbs (Background) */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[380px] bg-gradient-to-tr from-indigo-600/35 via-purple-600/25 to-pink-500/20 blur-[130px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute bottom-1/4 right-1/4 w-[420px] h-[320px] bg-blue-600/25 blur-[140px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-cyan-500/15 blur-[120px] rounded-full pointer-events-none -z-10" />
+
+      {/* Main Glass Center Card */}
+      <div className="w-full max-w-xl mx-auto flex flex-col items-center">
+        
+        {/* iOS Frosted App Icon Badge */}
+        <div className="w-16 h-16 rounded-3xl bg-white/[0.08] backdrop-blur-2xl border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_12px_32px_rgba(0,0,0,0.5)] flex items-center justify-center mb-5 transition-transform hover:scale-105 duration-300">
+          <Music className="w-8 h-8 text-white drop-shadow-md" />
         </div>
 
-        {/* LAN Access Chip */}
-        {lanIp && (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#121215] border border-zinc-800 text-xs text-zinc-400 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="hidden md:inline text-zinc-500 font-sans">HP:</span>
-              <span className="text-zinc-200">{lanIp}</span>
-            </div>
-            <button 
-              type="button"
-              onClick={handleCopyIp}
-              title="Salin alamat URL untuk dibuka di HP"
-              className="h-7 px-2.5 rounded-md bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-xs text-zinc-200 transition-colors flex items-center gap-1"
-            >
-              <Copy className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Salin</span>
-            </button>
-          </div>
-        )}
-      </header>
-
-      {/* Main Container */}
-      <main className="flex-1 flex flex-col justify-center px-4 py-12 max-w-2xl mx-auto w-full">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">Konversi ke MP3</h1>
-          <p className="text-sm text-zinc-400 mt-1">Ekstrak audio dari YouTube &amp; TikTok berkualitas tinggi ke format MP3.</p>
+        {/* Title & Subtitle */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white drop-shadow-sm">
+            Konversi ke MP3
+          </h1>
+          <p className="text-sm text-zinc-400/90 mt-2 font-normal max-w-sm mx-auto">
+            Ekstrak audio berkualitas tinggi dari YouTube &amp; TikTok langsung ke jam atau HP.
+          </p>
         </div>
 
-        {/* Input Box */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="rounded-xl border border-zinc-800 bg-[#121215] p-2 focus-within:border-zinc-500 transition-colors shadow-sm">
-            <div className="flex items-center gap-2 px-2 py-1">
-              <Link2 className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+        {/* Glassmorphism Input Form Container */}
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="rounded-3xl p-3 sm:p-4 backdrop-blur-2xl bg-white/[0.04] border border-white/[0.12] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_24px_60px_rgba(0,0,0,0.6)] transition-all">
+            
+            {/* Input Capsule */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-black/40 border border-white/10 focus-within:border-white/30 focus-within:ring-2 focus-within:ring-white/10 transition-all backdrop-blur-md">
+              <Link2 className="w-4 h-4 text-white/40 flex-shrink-0" />
               <input 
                 type="url" 
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 required
-                placeholder="Masukkan link YouTube atau TikTok..." 
-                className="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none"
+                placeholder="Tempel link YouTube atau TikTok..." 
+                className="w-full bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none font-normal"
               />
               <button 
                 type="button" 
                 onClick={handlePaste}
-                className="text-xs px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors flex-shrink-0 font-medium"
+                className="text-xs px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white/90 border border-white/10 transition-all flex-shrink-0 font-medium"
               >
                 Paste
               </button>
             </div>
 
-            <div className="mt-2 pt-2 border-t border-zinc-800/60 flex flex-wrap items-center justify-between gap-3 px-2">
-              {/* Bitrate Selector */}
-              <div className="flex items-center gap-1 bg-[#18181b] p-1 rounded-lg border border-zinc-800 text-xs">
-                <span className="text-[11px] text-zinc-500 px-1 font-mono uppercase">Bitrate:</span>
+            {/* Bottom Controls inside Glass Card */}
+            <div className="mt-3 pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3 px-1">
+              
+              {/* Bitrate iOS Segmented Control */}
+              <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/10 backdrop-blur-md">
+                <span className="text-[10px] text-white/40 px-2 font-mono uppercase tracking-wider">Bitrate</span>
                 {(["192", "320", "128"] as const).map((b) => (
                   <button
                     key={b}
                     type="button"
                     onClick={() => setBitrate(b)}
-                    className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+                    className={`px-3 py-1 rounded-xl text-xs font-mono transition-all ${
                       bitrate === b
-                        ? "bg-zinc-200 text-zinc-950 font-medium"
-                        : "text-zinc-400 hover:text-zinc-200"
+                        ? "bg-white/20 text-white shadow-sm border border-white/20 font-medium"
+                        : "text-white/50 hover:text-white/80"
                     }`}
                   >
                     {b}k
@@ -236,18 +183,18 @@ export default function Home() {
                 ))}
               </div>
 
-              {/* Submit Button */}
+              {/* Ekstrak & Unduh Primary Glass Button */}
               <button 
                 type="submit" 
                 disabled={loading}
-                className={`h-8 px-4 bg-zinc-100 hover:bg-white active:bg-zinc-200 text-zinc-950 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm ${
+                className={`h-10 px-5 bg-white text-zinc-950 font-semibold text-xs rounded-2xl hover:bg-white/90 active:scale-95 transition-all shadow-lg shadow-white/10 flex items-center gap-2 ${
                   loading ? "opacity-60 cursor-not-allowed" : ""
                 }`}
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Mengonversi...</span>
+                    <span>Memproses...</span>
                   </>
                 ) : (
                   <>
@@ -260,61 +207,69 @@ export default function Home() {
           </div>
         </form>
 
-        {/* Processing Indicator */}
+        {/* Processing Glass Capsule */}
         {loading && (
-          <div className="mt-6 rounded-xl border border-zinc-800 bg-[#121215] p-4 flex items-center gap-3 animate-fade-in">
-            <Loader2 className="w-4 h-4 text-zinc-400 animate-spin flex-shrink-0" />
+          <div className="w-full mt-5 rounded-2xl p-4 backdrop-blur-2xl bg-white/[0.05] border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_12px_30px_rgba(0,0,0,0.5)] flex items-center gap-3.5 animate-fade-in">
+            <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-zinc-200">Memproses media...</p>
-              <p className="text-[11px] text-zinc-500 mt-0.5 font-mono">Mengunduh stream &amp; encoding MP3</p>
+              <p className="text-xs font-medium text-white">Mengunduh &amp; Mengonversi...</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5 font-mono">Menyisipkan ID3 tags &amp; cover album</p>
             </div>
           </div>
         )}
 
-        {/* Error Notification */}
+        {/* Error Glass Notification */}
         {error && (
-          <div className="mt-6 rounded-xl border border-red-900/60 bg-red-950/20 p-4 text-xs text-red-300 flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-200">Gagal mengonversi</p>
-              <p className="mt-1 text-red-400 font-mono text-[11px]">{error}</p>
+          <div className="w-full mt-5 rounded-2xl p-4 backdrop-blur-2xl bg-red-500/[0.08] border border-red-500/25 text-red-200 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_12px_30px_rgba(0,0,0,0.5)] flex items-start gap-3 animate-fade-in">
+            <div className="w-7 h-7 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <AlertCircle className="w-4 h-4 text-red-300" />
+            </div>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <p className="text-xs font-semibold text-red-200">Gagal mengonversi</p>
+              <p className="mt-1 text-red-300/90 text-xs font-normal">{error}</p>
             </div>
           </div>
         )}
 
-        {/* Success / Download Card */}
+        {/* Success Download Glass Card */}
         {result && (
-          <div className="mt-6 rounded-xl border border-zinc-800 bg-[#121215] p-4 flex items-center justify-between gap-4 animate-fade-in">
+          <div className="w-full mt-5 rounded-3xl p-5 backdrop-blur-2xl bg-white/[0.07] border border-emerald-500/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_20px_45px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4 animate-fade-in">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-xs text-zinc-400 font-mono">MP3 Siap</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 text-emerald-400" />
+                </div>
+                <span className="text-[11px] text-emerald-300 font-mono uppercase tracking-wider">MP3 Siap</span>
               </div>
-              <p className="text-sm font-medium text-zinc-100 truncate mt-1">{result.filename}</p>
-              <p className="text-xs text-zinc-500 font-mono mt-0.5">{result.filesize} • {bitrate} kbps</p>
+              <p className="text-sm font-medium text-white truncate mt-1.5">{result.filename}</p>
+              <p className="text-xs text-zinc-400 font-mono mt-0.5">{result.filesize} • {bitrate} kbps</p>
             </div>
 
             <a 
               href={result.download_url} 
               download={result.filename}
-              className="h-9 px-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 text-xs font-medium text-white transition-colors flex items-center gap-1.5 flex-shrink-0"
+              className="h-10 px-4 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs font-medium text-emerald-200 transition-all flex items-center gap-1.5 flex-shrink-0 active:scale-95 shadow-md shadow-emerald-950/40"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Unduh Ulang</span>
+              <span>Unduh</span>
             </a>
           </div>
         )}
-      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-zinc-800/60 px-6 py-4 text-center text-xs text-zinc-600 font-mono">
-        Go Fiber v3 + Next.js 14 — Auto-cleaned storage
-      </footer>
+        {/* Subtle Footer */}
+        <p className="mt-12 text-xs text-zinc-600 font-mono text-center">
+          Huawei Watch Fit 4 &amp; Smartwatch Ready
+        </p>
 
-      {/* Toast */}
+      </div>
+
+      {/* Floating Dynamic Island Toast */}
       {toast && (
-        <div className="fixed bottom-5 right-5 bg-zinc-100 text-zinc-950 font-medium text-xs px-3.5 py-2 rounded-md shadow-lg transition-opacity">
-          {toast}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 text-white text-xs font-medium shadow-2xl tracking-wide flex items-center gap-2 animate-fade-in">
+          <Sparkles className="w-3.5 h-3.5 text-white/80" />
+          <span>{toast}</span>
         </div>
       )}
 
