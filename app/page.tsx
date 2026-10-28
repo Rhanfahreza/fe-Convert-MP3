@@ -110,12 +110,12 @@ export default function Home() {
 
       // Cek jika server backend sedang mati / offline (502, 503, 504, 530 Cloudflare)
       if (res.status === 502 || res.status === 503 || res.status === 504 || res.status === 530) {
-        throw new Error("Server backend belum dinyalakan di laptop. Silakan jalankan ./start-converter.sh di laptop.");
+        throw new Error("Server backend belum dinyalakan");
       }
 
       const contentType = res.headers.get("content-type") || "";
       if (!contentType.includes("application/json")) {
-        throw new Error("Server backend sedang offline. Pastikan ./start-converter.sh sudah dijalankan di laptop.");
+        throw new Error("Server backend belum dinyalakan");
       }
 
       const data = await res.json();
@@ -139,7 +139,7 @@ export default function Home() {
     } catch (err: unknown) {
       if (err instanceof Error) {
         if (err.name === "SyntaxError" || err.message.includes("JSON") || err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
-          setError("Server backend belum dinyalakan di laptop. Silakan jalankan ./start-converter.sh di laptop.");
+          setError("Server backend belum dinyalakan");
         } else {
           setError(err.message);
         }
