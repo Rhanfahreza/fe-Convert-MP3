@@ -124,6 +124,7 @@ export default function Home() {
       a.click();
       document.body.removeChild(a);
 
+      setUrl("");
       showToast("Download dimulai");
     } catch (err: unknown) {
       if (err instanceof Error) {
