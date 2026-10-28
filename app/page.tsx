@@ -108,10 +108,20 @@ export default function Home() {
         }),
       });
 
+      // Cek jika server backend sedang mati / offline (502, 503, 504, 530 Cloudflare)
+      if (res.status === 502 || res.status === 503 || res.status === 504 || res.status === 530) {
+        throw new Error("Server backend belum dinyalakan di laptop. Silakan jalankan ./start-converter.sh di laptop.");
+      }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        throw new Error("Server backend sedang offline. Pastikan ./start-converter.sh sudah dijalankan di laptop.");
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.detail || "Terjadi kesalahan saat memproses");
+        throw new Error(data.detail || data.error || "Terjadi kesalahan saat memproses");
       }
 
       setResult(data);
@@ -128,7 +138,11 @@ export default function Home() {
       showToast("Download dimulai");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.name === "SyntaxError" || err.message.includes("JSON") || err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+          setError("Server backend belum dinyalakan di laptop. Silakan jalankan ./start-converter.sh di laptop.");
+        } else {
+          setError(err.message);
+        }
       } else {
         setError("Terjadi kesalahan yang tidak diketahui");
       }
